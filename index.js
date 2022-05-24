@@ -3,6 +3,7 @@ const app = express()
 const port = process.env.PORT || 5000;
 var cors = require('cors')
 require('dotenv').config()
+var jwt = require('jsonwebtoken');
 
 app.use(cors())
 app.use(express.json())
@@ -13,6 +14,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 const toolCollection = client.db("manufactureDB").collection("tools");
 const ReviewCollection = client.db("manufactureDB").collection("reviews");
 const ordersCollection = client.db("manufactureDB").collection("orders");
+const usersCollection = client.db("manufactureDB").collection("users");
 
 async function run() {
   try {
@@ -51,11 +53,17 @@ async function run() {
       const id = req.params.id
       const query = { _id: ObjectId(`${id}`) };
       const result = await ordersCollection.deleteOne(query);
-      if (result.deletedCount === 1) {
-        console.log("Successfully deleted one document.");
-      } else {
-        console.log("No documents matched the query. Deleted 0 documents.");
-      }
+    })
+    app.put('/user/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const query = { email: email };
+      console.log(user)
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await usersCollection.updateOne(query, updateDoc, options);
     })
   } finally {
 
