@@ -12,6 +12,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const toolCollection = client.db("manufactureDB").collection("tools");
 const ReviewCollection = client.db("manufactureDB").collection("reviews");
+const ordersCollection = client.db("manufactureDB").collection("orders");
 
 async function run() {
   try {
@@ -23,10 +24,10 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result)
     })
-    app.get('/tools/:id', async(req, res) => {
+    app.get('/tools/:id', async (req, res) => {
       const id = req.params.id;
-      const query ={_id:ObjectId(`${id}`)};
-      const result =await toolCollection.findOne(query);
+      const query = { _id: ObjectId(`${id}`) };
+      const result = await toolCollection.findOne(query);
       res.send(result)
     })
     app.get('/reviews', async (req, res) => {
@@ -34,6 +35,27 @@ async function run() {
       const cursor = ReviewCollection.find(query);
       const result = await cursor.toArray();
       res.send(result)
+    })
+    app.post('/orders', async (req, res) => {
+      const doc = req.body.data;
+      const result = await ordersCollection.insertOne(doc);
+    })
+    app.get('/orders/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const cursor = ordersCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+    app.delete('/orders/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: ObjectId(`${id}`) };
+      const result = await ordersCollection.deleteOne(query);
+      if (result.deletedCount === 1) {
+        console.log("Successfully deleted one document.");
+      } else {
+        console.log("No documents matched the query. Deleted 0 documents.");
+      }
     })
   } finally {
 
