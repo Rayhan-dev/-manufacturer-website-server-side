@@ -112,6 +112,8 @@ async function run() {
     app.post('/addProduct', async (req, res) => {
       doc = req.body;
       console.log(doc)
+      const result = await toolCollection.insertOne(doc);
+      res.send(result);
     })
   } finally {
 
