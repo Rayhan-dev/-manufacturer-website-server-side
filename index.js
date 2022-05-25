@@ -92,16 +92,26 @@ async function run() {
       console.log(user);
       res.send(user);
     })
+    app.get('/admin/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const cursor = usersCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    })
     app.put('/admin/:email', async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
       const updateDoc = {
         $set: {
-          role:'admin'
+          role: 'admin'
         },
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
-      console.log(result.date);
+    })
+    app.post('/addProduct', async (req, res) => {
+      doc = req.body;
+      console.log(doc)
     })
   } finally {
 
