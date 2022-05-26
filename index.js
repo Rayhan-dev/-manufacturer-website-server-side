@@ -16,20 +16,20 @@ const ReviewCollection = client.db("manufactureDB").collection("reviews");
 const ordersCollection = client.db("manufactureDB").collection("orders");
 const usersCollection = client.db("manufactureDB").collection("users");
 
-const varifyJWT = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).send({ message: "UnAnthorized Access" })
-  }
-  const token = authHeader.split(' ')[1];
-  jwt.verify(token, process.env.JWT_TOKEN, function (err, decoded) {
-    if (err) {
-      return res.status(403).send({ message: "Forbidden Access" })
-    }
-    req.decoded = decoded;
-    next();
-  })
-}
+// const varifyJWT = (req, res, next) => {
+//   const authHeader = req.headers.authorization;
+//   if (!authHeader) {
+//     return res.status(401).send({ message: "UnAnthorized Access" })
+//   }
+//   const token = authHeader.split(' ')[1];
+//   jwt.verify(token, process.env.JWT_TOKEN, function (err, decoded) {
+//     if (err) {
+//       return res.status(403).send({ message: "Forbidden Access" })
+//     }
+//     req.decoded = decoded;
+//     next();
+//   })
+// }
 async function run() {
   try {
     await client.connect();
@@ -55,24 +55,27 @@ async function run() {
     app.post('/orders', async (req, res) => {
       const doc = req.body.data;
       const result = await ordersCollection.insertOne(doc);
+      res.send(result)
     })
-    app.get('/orders/:email', varifyJWT, async (req, res) => {
-      const decodedEmail = req.decoded.email;
+    app.get('/orders/:email', async (req, res) => {
+      // const decodedEmail = req.decoded.email;
       const email = req.params.email;
-      if (decodedEmail == email) {
-        const query = { email: email };
-        const cursor = ordersCollection.find(query);
-        const result = await cursor.toArray();
-        res.send(result)
-      }
-      return res.status(403).send({ message: "Forbidden Access" })
+      // if (decodedEmail == email) {
+
+      // }
+      const query = { email: email };
+      const cursor = ordersCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result)
+      // return res.status(403).send({ message: "Forbidden Access" })
 
     })
     app.delete('/orders/:id', async (req, res) => {
-      const authorization = req.headers.authorization;
+      // const authorization = req.headers.authorization;
       const id = req.params.id
       const query = { _id: ObjectId(`${id}`) };
       const result = await ordersCollection.deleteOne(query);
+      res.send(result);
     })
     app.put('/user/:email', async (req, res) => {
 
@@ -89,7 +92,6 @@ async function run() {
     })
     app.get('/users', async (req, res) => {
       const user = await usersCollection.find().toArray();
-      console.log(user);
       res.send(user);
     })
     app.get('/admin/:email', async (req, res) => {
@@ -108,11 +110,18 @@ async function run() {
         },
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result)
     })
     app.post('/addProduct', async (req, res) => {
       doc = req.body;
-      console.log(doc)
       const result = await toolCollection.insertOne(doc);
+      res.send(result);
+    })
+    app.get('/pay/:id', async (req, res) => {
+      const id = req.params.id;
+      // const query = { _id: ObjectId(id) }
+      const query = { _id: ObjectId(id) };
+      const result = await ordersCollection.findOne(query);
       res.send(result);
     })
   } finally {
