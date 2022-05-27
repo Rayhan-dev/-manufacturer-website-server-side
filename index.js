@@ -151,7 +151,7 @@ async function run() {
       const updateDoc = {
         $set: {
           paid: true,
-          transactionID: payment.transactionID
+          transactionID: payment.transactionId
         }
       }
       const updateingPayment = await ordersCollection.updateOne(query, updateDoc);
