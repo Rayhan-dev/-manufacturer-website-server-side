@@ -4,7 +4,7 @@ const port = process.env.PORT || 5000;
 var cors = require('cors')
 require('dotenv').config()
 var jwt = require('jsonwebtoken');
-const stripe = require('stripe')(process.env.STRIPE_KEY);
+const stripe = require("stripe")('sk_test_51L3Ts3JAWdakaiyOdR0N02W4KpOF5P0NzpZJlNDAnYtKAxxJIZcseYun58VbmOSFL9O5U7lYUh96XJqRwpI60r5l00zvSKplKw');
 
 app.use(cors())
 app.use(express.json())
@@ -136,6 +136,25 @@ async function run() {
     //   });
     //   res.send({ clientSecret: paymentIntent.client_secret })
     // });
+
+    // new 
+
+    app.post("/create-payment-intent", async (req, res) => {
+      const data = req.body;
+      const price = data.price;
+      const amount = price * 100;
+
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ['card']
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
     app.post('/addReview', async (req, res) => {
       const doc = req.body;
       const result = await ReviewCollection.insertOne(doc);
