@@ -16,6 +16,7 @@ const toolCollection = client.db("manufactureDB").collection("tools");
 const ReviewCollection = client.db("manufactureDB").collection("reviews");
 const ordersCollection = client.db("manufactureDB").collection("orders");
 const usersCollection = client.db("manufactureDB").collection("users");
+const paymentsCollection = client.db("manufactureDB").collection("payments");
 
 // const varifyJWT = (req, res, next) => {
 //   const authHeader = req.headers.authorization;
@@ -125,19 +126,6 @@ async function run() {
       const result = await ordersCollection.findOne(query);
       res.send(result);
     })
-    // app.post('/create-payment-intent', async (req, res) => {
-    //   const order = req.body;
-    //   const price = order.price;
-    //   const amount = price * 100;
-    //   const paymentIntent =  await stripe.paymentIntents.create({
-    //     amount: amount,
-    //     currency: 'usd',
-    //     payment_method_types: ['card']
-    //   });
-    //   res.send({ clientSecret: paymentIntent.client_secret })
-    // });
-
-    // new 
 
     app.post("/create-payment-intent", async (req, res) => {
       const data = req.body;
@@ -155,6 +143,21 @@ async function run() {
         clientSecret: paymentIntent.client_secret,
       });
     });
+
+    app.patch('/orders/:id', async(req, res) => {
+      const id = req.params.id
+      const payment= req.body
+      const query = { _id: ObjectId(`${id}`) };
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transactionID: payment.transactionID
+        }
+      }
+      const updateingPayment = await ordersCollection.updateOne(query, updateDoc);
+      const result = await paymentsCollection.insertOne(payment);
+      res.send(updateDoc);
+    })
     app.post('/addReview', async (req, res) => {
       const doc = req.body;
       const result = await ReviewCollection.insertOne(doc);
