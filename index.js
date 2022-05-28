@@ -54,7 +54,7 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result)
     })
-    app.post('/orders', varifyJWT, async (req, res) => {
+    app.post('/orders', async (req, res) => {
       const doc = req.body.data;
       const result = await ordersCollection.insertOne(doc);
       res.send(result)
