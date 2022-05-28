@@ -54,12 +54,12 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result)
     })
-    app.post('/orders', async (req, res) => {
+    app.post('/orders', varifyJWT, async (req, res) => {
       const doc = req.body.data;
       const result = await ordersCollection.insertOne(doc);
       res.send(result)
     })
-    app.get('/orders/:email', async (req, res) => {
+    app.get('/orders/:email', varifyJWT, async (req, res) => {
       // const decodedEmail = req.decoded.email;
       const email = req.params.email;
       // if (decodedEmail == email) {
