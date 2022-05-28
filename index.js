@@ -17,6 +17,19 @@ const ReviewCollection = client.db("manufactureDB").collection("reviews");
 const ordersCollection = client.db("manufactureDB").collection("orders");
 const usersCollection = client.db("manufactureDB").collection("users");
 const paymentsCollection = client.db("manufactureDB").collection("payments");
+const corsConfig = {
+  origin: '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+}
+app.use(cors(corsConfig))
+app.options("*", cors(corsConfig))
+app.use(express.json())
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*")
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,authorization")
+  next()
+})
 
 const varifyJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -48,7 +61,7 @@ async function run() {
       const result = await toolCollection.findOne(query);
       res.send(result)
     })
-    app.get('/reviews',  async (req, res) => {
+    app.get('/reviews', async (req, res) => {
       const query = {};
       const cursor = ReviewCollection.find(query);
       const result = await cursor.toArray();
@@ -144,9 +157,9 @@ async function run() {
       });
     });
 
-    app.patch('/orders/:id', async(req, res) => {
+    app.patch('/orders/:id', async (req, res) => {
       const id = req.params.id
-      const payment= req.body
+      const payment = req.body
       const query = { _id: ObjectId(`${id}`) };
       const updateDoc = {
         $set: {
