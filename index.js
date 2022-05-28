@@ -4,7 +4,7 @@ const port = process.env.PORT || 5000;
 var cors = require('cors')
 require('dotenv').config()
 var jwt = require('jsonwebtoken');
-const stripe = require("stripe")('sk_test_51L3Ts3JAWdakaiyOdR0N02W4KpOF5P0NzpZJlNDAnYtKAxxJIZcseYun58VbmOSFL9O5U7lYUh96XJqRwpI60r5l00zvSKplKw');
+const stripe = require("stripe")(`${process.env.STRIPE_KEY}`);
 
 app.use(cors())
 app.use(express.json())
@@ -18,25 +18,25 @@ const ordersCollection = client.db("manufactureDB").collection("orders");
 const usersCollection = client.db("manufactureDB").collection("users");
 const paymentsCollection = client.db("manufactureDB").collection("payments");
 
-// const varifyJWT = (req, res, next) => {
-//   const authHeader = req.headers.authorization;
-//   if (!authHeader) {
-//     return res.status(401).send({ message: "UnAnthorized Access" })
-//   }
-//   const token = authHeader.split(' ')[1];
-//   jwt.verify(token, process.env.JWT_TOKEN, function (err, decoded) {
-//     if (err) {
-//       return res.status(403).send({ message: "Forbidden Access" })
-//     }
-//     req.decoded = decoded;
-//     next();
-//   })
-// }
+const varifyJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "UnAnthorized Access" })
+  }
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token, process.env.JWT_TOKEN, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden Access" })
+    }
+    req.decoded = decoded;
+    next();
+  })
+}
 async function run() {
   try {
     await client.connect();
 
-    app.get('/tools', async (req, res) => {
+    app.get('/tools', varifyJWT, async (req, res) => {
       const query = {};
       const cursor = toolCollection.find(query);
       const result = await cursor.toArray();
@@ -48,7 +48,7 @@ async function run() {
       const result = await toolCollection.findOne(query);
       res.send(result)
     })
-    app.get('/reviews', async (req, res) => {
+    app.get('/reviews', varifyJWT, async (req, res) => {
       const query = {};
       const cursor = ReviewCollection.find(query);
       const result = await cursor.toArray();
@@ -92,7 +92,7 @@ async function run() {
       const result = await usersCollection.updateOne(query, updateDoc, options);
       res.send({ result, token })
     })
-    app.get('/users', async (req, res) => {
+    app.get('/users', varifyJWT, async (req, res) => {
       const user = await usersCollection.find().toArray();
       res.send(user);
     })
