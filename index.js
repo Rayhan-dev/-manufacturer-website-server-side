@@ -36,7 +36,7 @@ async function run() {
   try {
     await client.connect();
 
-    app.get('/tools', varifyJWT, async (req, res) => {
+    app.get('/tools', async (req, res) => {
       const query = {};
       const cursor = toolCollection.find(query);
       const result = await cursor.toArray();
@@ -48,7 +48,7 @@ async function run() {
       const result = await toolCollection.findOne(query);
       res.send(result)
     })
-    app.get('/reviews', varifyJWT, async (req, res) => {
+    app.get('/reviews',  async (req, res) => {
       const query = {};
       const cursor = ReviewCollection.find(query);
       const result = await cursor.toArray();
