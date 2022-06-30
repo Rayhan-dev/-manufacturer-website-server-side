@@ -85,6 +85,24 @@ async function run() {
       // return res.status(403).send({ message: "Forbidden Access" })
 
     })
+    app.put('/orders/:transactionID', async (req, res) => {
+      const transactionID = req.params.transactionID;
+      const query = { transactionID: transactionID };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: 'Delivered'
+        },
+      };
+      const result = await ordersCollection.updateOne(query, updateDoc, options);
+      res.send(result)
+    })
+    app.get('/orders', varifyJWT, async (req, res) => {
+      const query = {};
+      const cursor = ordersCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result)
+    })
     app.delete('/orders/:id', async (req, res) => {
       // const authorization = req.headers.authorization;
       const id = req.params.id
@@ -176,6 +194,7 @@ async function run() {
       const result = await ReviewCollection.insertOne(doc);
       res.send(result)
     })
+    
   } finally {
 
   }
